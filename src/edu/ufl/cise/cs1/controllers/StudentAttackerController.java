@@ -18,6 +18,8 @@ public final class StudentAttackerController implements AttackerController {
     public int update(Game game, long timeDue) {
         int action = -1;
         Defender closestDefender = game.getDefender(0);
+        Defender secondClosestDefender = game.getDefender(1);
+        int nodesToNextDefender = 999;
         int nodesToDefender = 999;
         List<Defender> defenders = game.getDefenders();
         Attacker me = game.getAttacker();
@@ -26,16 +28,17 @@ public final class StudentAttackerController implements AttackerController {
             int tempNodeCount = me.getLocation().getPathDistance(d.getLocation());
 
             if (tempNodeCount < nodesToDefender && tempNodeCount >= 0) {
+                nodesToNextDefender = Integer.valueOf(nodesToDefender);
                 nodesToDefender = tempNodeCount;
+                secondClosestDefender = closestDefender;
                 closestDefender = d;
-
             }
         }
         //if you run into a wall or reach a junction
 
         //if an enemy is too close for comfort
         if (closestDefender != null) {
-            if (!closestDefender.isVulnerable() && nodesToDefender < 6 && nodesToDefender >= 0) {
+            if (!closestDefender.isVulnerable() && nodesToDefender <= 8 && nodesToDefender >= 0) {
                 // System.out.println("Defender " + closestDefender.toString() + " is " + me.getLocation().getPathDistance(closestDefender.getLocation()) + " moves away!");
                 int moveToPill = 0;
                 if (game.getPowerPillList().size() > 0)
@@ -45,23 +48,19 @@ public final class StudentAttackerController implements AttackerController {
 
                 int moveToDefender = me.getNextDir(closestDefender.getLocation(), true);
                 if (moveToPill != moveToDefender) {
-                    boolean canMoveToPill = false;
-                    for (Integer i : me.getPossibleDirs(false)) {
-                        if (i == moveToPill) {
-                            canMoveToPill = true;
-                        }
+                    action = moveToPill;
+                } else {
+                    action = me.getNextDir(closestDefender.getLocation(), false);
+                }
+                //need to make sure that the direction I'm going doesn't have anybody to stop me if I'm at a junction
+                //this way I can make a better choice
+                if(me.getLocation().isJunction() && nodesToNextDefender < 40 && nodesToNextDefender >= 0) {
+                    for (Integer i : me.getPossibleDirs(true)) {
+                        if (i != me.getNextDir(closestDefender.getLocation(), true) && i != me.getNextDir(secondClosestDefender.getLocation(), true))
+                            action = i;
                     }
-                    if (canMoveToPill)
-                        return moveToPill;
-                    else {
-                        for (Integer i : me.getPossibleDirs(false)) {
-                            if (i != moveToDefender) {
-                                return i;
-                            }
-                        }
-                    }
-                } else
-                    return me.getNextDir(closestDefender.getLocation(), false);
+                }
+                return action;
             }
             if (closestDefender.isVulnerable() && nodesToDefender < 25 && nodesToDefender >= 0) {
                 // System.out.println("Eat defender " + closestDefender.toString() + ". He's only " + nodesToDefender + " moves away!");
