@@ -38,7 +38,7 @@ public final class StudentAttackerController implements AttackerController {
 
         //if an enemy is too close for comfort
         if (closestDefender != null) {
-            if (!closestDefender.isVulnerable() && nodesToDefender <= 8 && nodesToDefender >= 0) {
+            if (!closestDefender.isVulnerable() && nodesToDefender <= 5 && nodesToDefender >= 0) {
                 // System.out.println("Defender " + closestDefender.toString() + " is " + me.getLocation().getPathDistance(closestDefender.getLocation()) + " moves away!");
                 int moveToPill = 0;
                 if (game.getPowerPillList().size() > 0)
@@ -54,7 +54,7 @@ public final class StudentAttackerController implements AttackerController {
                 }
                 //need to make sure that the direction I'm going doesn't have anybody to stop me if I'm at a junction
                 //this way I can make a better choice
-                if(me.getLocation().isJunction() && nodesToNextDefender < 40 && nodesToNextDefender >= 0) {
+                if(me.getLocation().isJunction() && nodesToNextDefender < 120 && nodesToNextDefender >= 0) {
                     for (Integer i : me.getPossibleDirs(true)) {
                         if (i != me.getNextDir(closestDefender.getLocation(), true) && i != me.getNextDir(secondClosestDefender.getLocation(), true))
                             action = i;
