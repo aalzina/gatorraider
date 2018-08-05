@@ -25,29 +25,53 @@ public final class StudentAttackerController implements AttackerController {
         for (Defender d : defenders) {
             int tempNodeCount = me.getLocation().getPathDistance(d.getLocation());
 
-            if (tempNodeCount < nodesToDefender) {
+            if (tempNodeCount < nodesToDefender && tempNodeCount >= 0) {
                 nodesToDefender = tempNodeCount;
                 closestDefender = d;
 
             }
         }
-        //if an enemy is too close for comfort
-        if (closestDefender != null && !me.getLocation().isJunction()) {
-            if (!closestDefender.isVulnerable() && me.getLocation().getPathDistance(closestDefender.getLocation()) < 9)
-                return me.getNextDir(closestDefender.getLocation(), false);
-        }
         //if you run into a wall or reach a junction
-        if (nextNode == null || me.getLocation().isJunction()) {
-            //get to closest pill unless defender is vulnerable
-            if (me.getLocation().isJunction()) {
-                if (closestDefender != null) {
-                    if (closestDefender.isVulnerable() && me.getLocation().getPathDistance(closestDefender.getLocation()) < 20) {
-                        return me.getNextDir(closestDefender.getLocation(), true);
+
+        //if an enemy is too close for comfort
+        if (closestDefender != null) {
+            if (!closestDefender.isVulnerable() && nodesToDefender < 6 && nodesToDefender >= 0) {
+                // System.out.println("Defender " + closestDefender.toString() + " is " + me.getLocation().getPathDistance(closestDefender.getLocation()) + " moves away!");
+                int moveToPill = 0;
+                if (game.getPowerPillList().size() > 0)
+                    moveToPill = me.getNextDir(me.getTargetNode(game.getPowerPillList(), true), true);
+                else
+                    moveToPill = me.getNextDir(me.getTargetNode(game.getPillList(), true), true);
+
+                int moveToDefender = me.getNextDir(closestDefender.getLocation(), true);
+                if (moveToPill != moveToDefender) {
+                    boolean canMoveToPill = false;
+                    for (Integer i : me.getPossibleDirs(false)) {
+                        if (i == moveToPill) {
+                            canMoveToPill = true;
+                        }
                     }
-                }
+                    if (canMoveToPill)
+                        return moveToPill;
+                    else {
+                        for (Integer i : me.getPossibleDirs(false)) {
+                            if (i != moveToDefender) {
+                                return i;
+                            }
+                        }
+                    }
+                } else
+                    return me.getNextDir(closestDefender.getLocation(), false);
             }
+            if (closestDefender.isVulnerable() && nodesToDefender < 25 && nodesToDefender >= 0) {
+                // System.out.println("Eat defender " + closestDefender.toString() + ". He's only " + nodesToDefender + " moves away!");
+                return me.getNextDir(closestDefender.getLocation(), true);
+            }
+        }
+        if (nextNode == null || me.getLocation().isJunction()) {
             return me.getNextDir(me.getTargetNode(game.getPillList(), true), true);
         }
+
         return me.getNextDir(me.getTargetNode(game.getPillList(), true), true);
     }
 }
