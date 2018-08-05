@@ -56,7 +56,10 @@ public final class StudentAttackerController implements AttackerController {
                 }
                 //need to make sure that the direction I'm going doesn't have anybody to stop me if I'm at a junction
                 //this way I can make a better choice
-                if (me.getLocation().isJunction() && nodesToNextDefender < 50 && nodesToNextDefender >= 0) {
+                //using 75 avg was 5600
+                //using 35 was 5034
+                //using 55 was
+                if (me.getLocation().isJunction() && nodesToNextDefender < 55 && nodesToNextDefender >= 0) {
                     for (Integer i : me.getPossibleDirs(true)) {
                         if (i == secondClosestDefender.getDirection() && i != me.getDirection() && i != me.getNextDir(closestDefender.getLocation(), false))
                             action = i;
